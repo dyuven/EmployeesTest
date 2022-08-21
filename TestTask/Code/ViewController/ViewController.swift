@@ -8,7 +8,8 @@
 import UIKit
 
 protocol ViewControllerDisplayLogic: AnyObject {
-
+  func displayEmployees(employees: [Employee])
+  func displayError(error: Error)
 }
 
 class ViewController: UIViewController, ViewControllerDisplayLogic {
@@ -27,7 +28,6 @@ class ViewController: UIViewController, ViewControllerDisplayLogic {
   private lazy var employeesTable: UITableView = {
     let table = UITableView(frame: .zero, style: .grouped)
     table.dataSource = self
-    table.delegate = self
     table.isScrollEnabled = true
     table.register(EmployeeTableViewCell.self, forCellReuseIdentifier: "EmployeeTableViewCell")
     return table
@@ -49,10 +49,7 @@ class ViewController: UIViewController, ViewControllerDisplayLogic {
     setup()
   }
   
-  var tempData = [ViewControllerModel.Employee(name: "John", phone: "12345", skills: ["swift", "xcode"]),
-                  ViewControllerModel.Employee(name: "Diego", phone: "123123", skills: ["kotlin", "java"]),
-                  ViewControllerModel.Employee(name: "Alfred", phone: "66666", skills: ["photoshop", "adobe"])
-  ].sorted { $0.name > $1.name }
+  var tempData: [Employee] = []
   
   // MARK: - Setup
   
@@ -69,11 +66,12 @@ class ViewController: UIViewController, ViewControllerDisplayLogic {
     override func viewDidLoad() {
       super.viewDidLoad()
       setupViews()
+      interactor?.getEmployees()
     }
 
   
   private func setupViews() {
- //   showLoadingIndicator(onView: view)
+    showLoadingIndicator(onView: view)
     view.backgroundColor = .white
     employeesTable.estimatedRowHeight = 60
     employeesTable.rowHeight = UITableView.automaticDimension
@@ -94,6 +92,23 @@ class ViewController: UIViewController, ViewControllerDisplayLogic {
       
     ])
   }
+  
+  
+  func displayEmployees(employees: [Employee]) {
+    tempData = employees.sorted { $0.name < $1.name }
+    removeLoadingIndicator()
+    employeesTable.reloadData()
+  }
+  
+  func displayError(error: Error) {
+    let dialogMessage = UIAlertController(title: "Ошибка", message: error.localizedMessage , preferredStyle: .alert)
+    self.removeLoadingIndicator()
+    self.present(dialogMessage, animated: true, completion: nil)
+    let when = DispatchTime.now() + 3
+    DispatchQueue.main.asyncAfter(deadline: when){
+      dialogMessage.dismiss(animated: true, completion: nil)
+    }
+  }
 
 }
 
@@ -107,7 +122,7 @@ extension ViewController: UITableViewDataSource {
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCell(withIdentifier: "EmployeeTableViewCell", for: indexPath) as! EmployeeTableViewCell
     cell.nameLabel.text = "name: " + tempData[indexPath.row].name
-    cell.phoneLabel.text = "phone: " + tempData[indexPath.row].phone
+    cell.phoneLabel.text = "phone: " + tempData[indexPath.row].phone_number
     cell.skillsLabel.text = "skills: " + tempData[indexPath.row].skills.joined(separator: ", ")
     return cell
   }
@@ -115,6 +130,3 @@ extension ViewController: UITableViewDataSource {
   
 }
 
-extension ViewController: UITableViewDelegate {
-  
-}
