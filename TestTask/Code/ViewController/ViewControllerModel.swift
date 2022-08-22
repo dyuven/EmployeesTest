@@ -9,10 +9,12 @@ import Foundation
 
 enum ViewControllerModel {
   
-  struct Employee {
-    let name: String
-    let phone: String
-    let skills: [String]
+  public enum MyError: String, PresentableError {
+    func getLocalizedMessage() -> String {
+      return self.rawValue
+    }
+    
+    case urlError = "incorrect url"
   }
 
 }

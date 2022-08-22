@@ -56,7 +56,9 @@ class EmployeeTableViewCell: UITableViewCell {
     
 
     nameLabel.setContentHuggingPriority(.fittingSizeLevel, for: .vertical)
+    phoneLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
     nameLabel.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+    phoneLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
     
     NSLayoutConstraint.activate([
       nameLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
